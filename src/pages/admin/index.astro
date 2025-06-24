@@ -1,0 +1,164 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getCollection } from 'astro:content';
+import { siteConfig } from '../../data/siteConfig';
+
+// 获取所有博客文章和项目
+const allBlogPosts = await getCollection('blog');
+const allProjects = await getCollection('projects');
+
+// 按发布日期排序
+const sortedBlogPosts = allBlogPosts.sort((a, b) => 
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+
+const sortedProjects = allProjects.sort((a, b) => 
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+
+// 统计信息
+const stats = {
+  totalPosts: allBlogPosts.length,
+  totalProjects: allProjects.length,
+  categories: [...new Set(allBlogPosts.map(post => post.data.category).filter(Boolean))],
+  tags: [...new Set(allBlogPosts.flatMap(post => post.data.tags || []))],
+  draftPosts: allBlogPosts.filter(post => post.data.draft).length,
+  featuredPosts: allBlogPosts.filter(post => post.data.featured).length,
+  featuredProjects: allProjects.filter(project => project.data.featured).length,
+};
+---
+
+<MainLayout title="内容管理 | 管理面板" description="管理您的博客文章和项目">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">内容管理面板</h1>
+    
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">博客统计</h2>
+        <div class="space-y-2">
+          <p>总文章数: <span class="font-medium">{stats.totalPosts}</span></p>
+          <p>草稿文章: <span class="font-medium">{stats.draftPosts}</span></p>
+          <p>精选文章: <span class="font-medium">{stats.featuredPosts}</span></p>
+        </div>
+      </div>
+      
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">项目统计</h2>
+        <div class="space-y-2">
+          <p>总项目数: <span class="font-medium">{stats.totalProjects}</span></p>
+          <p>精选项目: <span class="font-medium">{stats.featuredProjects}</span></p>
+        </div>
+      </div>
+      
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">分类与标签</h2>
+        <div class="space-y-2">
+          <p>分类数量: <span class="font-medium">{stats.categories.length}</span></p>
+          <p>标签数量: <span class="font-medium">{stats.tags.length}</span></p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 博客文章列表 -->
+    <section class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">博客文章</h2>
+        <a href="#" class="text-accent hover:underline">添加新文章</a>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-gray-100 dark:bg-gray-800">
+              <th class="p-3 text-left">标题</th>
+              <th class="p-3 text-left">发布日期</th>
+              <th class="p-3 text-left">分类</th>
+              <th class="p-3 text-left">状态</th>
+              <th class="p-3 text-left">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedBlogPosts.map(post => (
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <td class="p-3">
+                  <a href={`/blog/${post.slug}`} class="hover:text-accent">
+                    {post.data.title}
+                    {post.data.featured && <span class="ml-2 text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">精选</span>}
+                  </a>
+                </td>
+                <td class="p-3">{new Date(post.data.pubDate).toLocaleDateString()}</td>
+                <td class="p-3">{post.data.category || '未分类'}</td>
+                <td class="p-3">
+                  {post.data.draft 
+                    ? <span class="text-amber-500">草稿</span> 
+                    : <span class="text-green-500">已发布</span>
+                  }
+                </td>
+                <td class="p-3">
+                  <div class="flex space-x-2">
+                    <a href="#" class="text-blue-500 hover:underline">编辑</a>
+                    <button class="text-red-500 hover:underline">删除</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- 项目列表 -->
+    <section>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">项目</h2>
+        <a href="#" class="text-accent hover:underline">添加新项目</a>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-gray-100 dark:bg-gray-800">
+              <th class="p-3 text-left">标题</th>
+              <th class="p-3 text-left">发布日期</th>
+              <th class="p-3 text-left">分类</th>
+              <th class="p-3 text-left">状态</th>
+              <th class="p-3 text-left">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedProjects.map(project => (
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <td class="p-3">
+                  <a href={`/projects#${project.slug}`} class="hover:text-accent">
+                    {project.data.title}
+                    {project.data.featured && <span class="ml-2 text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">精选</span>}
+                  </a>
+                </td>
+                <td class="p-3">{new Date(project.data.pubDate).toLocaleDateString()}</td>
+                <td class="p-3">{project.data.category || '未分类'}</td>
+                <td class="p-3">
+                  {project.data.inProgress 
+                    ? <span class="text-amber-500">进行中</span> 
+                    : <span class="text-green-500">已完成</span>
+                  }
+                </td>
+                <td class="p-3">
+                  <div class="flex space-x-2">
+                    <a href="#" class="text-blue-500 hover:underline">编辑</a>
+                    <button class="text-red-500 hover:underline">删除</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</MainLayout>
+
+<script>
+  // 这里可以添加管理面板的交互逻辑
+  // 例如删除确认、状态切换等
+</script> 

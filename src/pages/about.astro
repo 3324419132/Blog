@@ -1,0 +1,133 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION, AUTHOR_NAME } from '../consts';
+---
+
+<html lang="zh-CN" class="scroll-smooth">
+	<head>
+		<BaseHead title={`关于 | ${SITE_TITLE}`} description="了解更多关于我的信息" />
+	</head>
+	<body>
+		<Header />
+		<main class="container mx-auto px-4 py-8">
+			<div class="max-w-3xl mx-auto">
+				<header class="mb-12">
+					<h1 class="text-4xl md:text-5xl font-serif font-bold mb-4 text-gray-900 dark:text-gray-100">
+						关于我
+					</h1>
+					<p class="text-xl text-gray-600 dark:text-gray-400">
+						{SITE_DESCRIPTION}
+					</p>
+				</header>
+
+				<!-- 个人介绍 -->
+				<section class="mb-16">
+					<h2 class="text-2xl font-serif font-bold mb-6 text-accent">个人简介</h2>
+					<div class="prose prose-lg dark:prose-invert max-w-none">
+						<p>你好！我是{AUTHOR_NAME}，一名充满热情的开发者，热衷于探索技术的边界和创造有价值的数字体验。</p>
+						
+						<p>我专注于前端开发和用户体验设计，同时也对人工智能、数据可视化等领域保持浓厚的兴趣。我相信技术应该为人类创造价值，而不仅仅是为技术而技术。</p>
+						
+						<p>在这个数字花园里，我将分享我的技术见解、项目经历以及工作中的思考。希望这些内容能对你有所启发。</p>
+					</div>
+				</section>
+
+				<!-- 技能云 -->
+				<section class="mb-16">
+					<h2 class="text-2xl font-serif font-bold mb-6 text-accent">技能栈</h2>
+					<div class="flex flex-wrap gap-2">
+						{
+							['JavaScript', 'TypeScript', 'React', 'Vue', 'Node.js', 'Astro', 
+							'Tailwind CSS', 'UI/UX设计', 'Git', '响应式设计', '前端架构',
+							'性能优化', 'REST API', 'GraphQL'].map((skill) => (
+								<span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-sm">
+									{skill}
+								</span>
+							))
+						}
+					</div>
+				</section>
+
+				<!-- 经历时间轴 -->
+				<section class="mb-16">
+					<h2 class="text-2xl font-serif font-bold mb-6 text-accent">我的经历</h2>
+					<div class="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-1/2 before:bg-gradient-to-b before:from-accent before:to-accent/30 md:before:mx-auto md:before:translate-x-0">
+						<!-- 时间节点1 -->
+						<div class="relative flex flex-col md:flex-row md:justify-between md:items-center">
+							<div class="flex items-center md:w-1/2 md:justify-end md:pr-8">
+								<div class="flex items-center justify-center w-10 h-10 rounded-full bg-accent text-white md:absolute md:left-1/2 md:transform md:-translate-x-1/2 shadow-lg">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5.5a.75.75 0 001.5 0V5z" clip-rule="evenodd" />
+									</svg>
+								</div>
+								<div class="ml-4 md:ml-0">
+									<span class="text-lg font-medium text-gray-900 dark:text-gray-100 md:text-right">2022 - 至今</span>
+								</div>
+							</div>
+							<div class="mt-4 md:mt-0 md:w-1/2 md:pl-8">
+								<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">高级前端开发工程师</h3>
+								<p class="mt-1 text-gray-600 dark:text-gray-400">负责公司核心产品的前端架构设计和开发，优化用户体验和页面性能。</p>
+							</div>
+						</div>
+
+						<!-- 时间节点2 -->
+						<div class="relative flex flex-col md:flex-row md:justify-between md:items-center">
+							<div class="flex items-center md:w-1/2 md:justify-end md:pr-8">
+								<div class="flex items-center justify-center w-10 h-10 rounded-full bg-accent text-white md:absolute md:left-1/2 md:transform md:-translate-x-1/2 shadow-lg">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+										<path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zm5.99 7.176A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+									</svg>
+								</div>
+								<div class="ml-4 md:ml-0">
+									<span class="text-lg font-medium text-gray-900 dark:text-gray-100 md:text-right">2020 - 2022</span>
+								</div>
+							</div>
+							<div class="mt-4 md:mt-0 md:w-1/2 md:pl-8">
+								<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">前端开发工程师</h3>
+								<p class="mt-1 text-gray-600 dark:text-gray-400">参与多个企业级应用的开发，致力于提升产品交互体验和技术创新。</p>
+							</div>
+						</div>
+
+						<!-- 时间节点3 -->
+						<div class="relative flex flex-col md:flex-row md:justify-between md:items-center">
+							<div class="flex items-center md:w-1/2 md:justify-end md:pr-8">
+								<div class="flex items-center justify-center w-10 h-10 rounded-full bg-accent text-white md:absolute md:left-1/2 md:transform md:-translate-x-1/2 shadow-lg">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+										<path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+									</svg>
+								</div>
+								<div class="ml-4 md:ml-0">
+									<span class="text-lg font-medium text-gray-900 dark:text-gray-100 md:text-right">2018 - 2020</span>
+								</div>
+							</div>
+							<div class="mt-4 md:mt-0 md:w-1/2 md:pl-8">
+								<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">开始学习前端开发</h3>
+								<p class="mt-1 text-gray-600 dark:text-gray-400">初识HTML、CSS和JavaScript，开启了我的Web开发之旅，踏上了不断学习的技术道路。</p>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- 联系我 -->
+				<section class="mb-8">
+					<h2 class="text-2xl font-serif font-bold mb-6 text-accent">联系我</h2>
+					<p class="text-gray-600 dark:text-gray-400 mb-4">
+						如果你有任何问题或合作机会，欢迎通过以下方式联系我：
+					</p>
+					<div class="flex items-center space-x-4">
+						<a href="mailto:hello@example.com" class="flex items-center text-accent hover:text-accent-dark">
+							<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+								<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+							</svg>
+							<span>hello@example.com</span>
+						</a>
+					</div>
+				</section>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,144 @@
+/*
+  The CSS in this style tag is based off of Bear Blog's default CSS.
+  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
+  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	/* 引入思源黑体(Noto Sans SC) */
+	@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+:root {
+		--accent: #FF7D00; /* 大豆橙 - 主题色 */
+		--accent-light: #FFB366;
+		--accent-dark: #CC6400;
+		--black: 26, 22, 19; /* 对应暗色 gray-900 */
+		--gray: 107, 102, 95; /* 对应 gray-600 */
+		--gray-light: 240, 238, 235; /* 对应 gray-100 */
+		--gray-dark: 63, 58, 54; /* 对应 gray-800 */
+		--bg-light: 255, 250, 245; /* 浅色背景 */
+		--bg-dark: 26, 22, 19; /* 暗色背景 */
+		--text-light: 63, 58, 54; /* 浅色模式文本 */
+		--text-dark: 232, 226, 221; /* 暗色模式文本 */
+	}
+
+	.dark {
+		--accent: #FFB366; /* 暗色模式下更亮的橙色 */
+		--accent-dark: #FF7D00;
+		--accent-light: #FFCA99;
+}
+
+	html {
+		@apply scroll-smooth;
+}
+	
+body {
+		@apply font-sans bg-bg-light text-text-light dark:bg-bg-dark dark:text-text-dark;
+	}
+
+	/* 标题使用衬线字体 */
+	h1, h2, h3, h4, h5, h6 {
+		@apply font-serif font-bold my-4 text-gray-900 dark:text-gray-100;
+}
+
+	h1 {
+		@apply text-4xl md:text-5xl;
+}
+	h2 {
+		@apply text-3xl md:text-4xl;
+}
+	h3 {
+		@apply text-2xl md:text-3xl;
+}
+	h4 {
+		@apply text-xl md:text-2xl;
+}
+	h5 {
+		@apply text-lg md:text-xl;
+}
+	h6 {
+		@apply text-base md:text-lg;
+}
+
+	p {
+		@apply mb-4;
+}
+
+	a {
+		@apply text-accent hover:text-accent-dark transition-colors;
+}
+
+	blockquote {
+		@apply pl-4 my-4 border-l-4 border-accent;
+}
+
+	code {
+		@apply px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-sm;
+}
+
+	pre {
+		@apply p-4 rounded-lg overflow-x-auto;
+}
+
+	pre code {
+		@apply bg-transparent p-0;
+}
+
+img {
+		@apply max-w-full h-auto rounded-lg;
+}
+
+	hr {
+		@apply my-8 border-t border-gray-200 dark:border-gray-700;
+}
+
+	/* 自定义滚动条 */
+	::-webkit-scrollbar {
+		@apply w-2;
+}
+
+	::-webkit-scrollbar-track {
+		@apply bg-gray-100 dark:bg-gray-800;
+	}
+
+	::-webkit-scrollbar-thumb {
+		@apply bg-gray-300 dark:bg-gray-600 rounded-full;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		@apply bg-gray-400 dark:bg-gray-500;
+}
+
+	/* 文本选择样式 */
+	::selection {
+		@apply bg-accent/20 text-accent-dark;
+	}
+}
+
+/* 页面过渡动画 */
+@layer components {
+	.page-transition {
+		@apply animate-fade-in;
+	}
+
+	.slide-up {
+		@apply animate-slide-up;
+	}
+}
+
+/* 辅助类 */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}

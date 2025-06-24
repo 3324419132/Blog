@@ -1,0 +1,368 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import MainLayout from './MainLayout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import Comments from '../components/Comments.astro';
+import { Image } from 'astro:assets';
+import { SITE_TITLE } from '../consts';
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
+
+// 估计阅读时间
+const readingTime = (text: string) => {
+	const wordsPerMinute = 200; // 平均阅读速度
+	const words = text.split(/\s+/).length;
+	return Math.ceil(words / wordsPerMinute);
+};
+
+// 获取文章内容的估计阅读时间
+const estimatedReadingTime = Astro.props.readingTime || 3; // 使用元数据中的阅读时间或默认为3分钟
+
+// 生成结构化数据
+const schemaOrgWebPage = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	"headline": title,
+	"description": description,
+	"image": heroImage ? [heroImage] : [],
+	"datePublished": pubDate.toISOString(),
+	"dateModified": updatedDate ? updatedDate.toISOString() : pubDate.toISOString(),
+	"author": {
+		"@type": "Person",
+		"name": "大豆橙",
+		"url": "https://digital-garden.example.com/about"
+	},
+	"publisher": {
+		"@type": "Organization",
+		"name": SITE_TITLE,
+		"logo": {
+			"@type": "ImageObject",
+			"url": "https://digital-garden.example.com/favicon.svg"
+		}
+	},
+	"mainEntityOfPage": {
+		"@type": "WebPage",
+		"@id": Astro.url.href
+	},
+	"keywords": tags ? tags.join(", ") : ""
+};
+---
+
+<MainLayout title={title} description={description}>
+	<!-- 添加结构化数据 -->
+	<script type="application/ld+json" slot="head" set:html={JSON.stringify(schemaOrgWebPage)} />
+	
+	<!-- 确保CodeBlock组件被加载 -->
+	<CodeBlock />
+
+	<!-- 阅读进度条 -->
+	<div class="reading-progress fixed top-0 left-0 w-full h-1 bg-transparent z-50">
+		<div id="progress-bar" class="h-full bg-accent w-0"></div>
+	</div>
+	
+	<main class="relative">
+		<article class="max-w-4xl mx-auto px-4">
+			<!-- 文章头部 -->
+			<div class="hero py-12 md:py-20">
+				{heroImage && (
+					<div class="hero-image mb-8">
+						<Image 
+							src={heroImage} 
+							alt="" 
+							width={1200} 
+							height={600}
+							class="w-full h-[40vh] object-cover rounded-xl shadow-lg"
+						/>
+				</div>
+				)}
+				
+				<div class="text-center mb-8">
+					<div class="flex justify-center items-center gap-2 mb-4 text-gray-500 dark:text-gray-400">
+						<time datetime={pubDate.toISOString()}>
+							<FormattedDate date={pubDate} />
+						</time>
+						<span>•</span>
+						<span id="reading-time">约 {estimatedReadingTime} 分钟阅读</span>
+						
+						{updatedDate && (
+							<>
+								<span>•</span>
+								<span class="last-updated">
+									更新于 <FormattedDate date={updatedDate} />
+								</span>
+							</>
+						)}
+					</div>
+					
+					<h1 class="text-4xl md:text-5xl font-serif font-bold mb-4">{title}</h1>
+					<p class="text-xl text-gray-600 dark:text-gray-300">{description}</p>
+					
+					{tags && (
+						<div class="flex flex-wrap justify-center gap-2 mt-6">
+							{tags.map(tag => (
+								<a 
+									href={`/blog?tag=${tag}`}
+									class="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-accent/20 transition-colors"
+								>
+									{tag}
+								</a>
+							))}
+						</div>
+					)}
+				</div>
+			</div>
+			
+			<!-- 文章内容与目录 -->
+			<div class="flex flex-col md:flex-row gap-8">
+				<!-- 目录导航 (桌面端) -->
+				<div class="hidden md:block md:w-64 lg:w-72 shrink-0">
+					<div class="sticky top-24">
+						<h2 class="text-lg font-medium mb-4">目录</h2>
+						<nav class="toc text-sm" id="table-of-contents"></nav>
+					</div>
+				</div>
+				
+				<!-- 文章主体 -->
+				<div class="prose prose-lg dark:prose-invert max-w-none md:max-w-2xl">
+					<slot />
+					
+					<!-- 评论区 -->
+					<Comments />
+				</div>
+			</div>
+			
+			<!-- 移动端目录按钮 -->
+			<button 
+				id="toc-toggle"
+				class="md:hidden fixed bottom-6 right-6 w-12 h-12 rounded-full bg-accent text-white shadow-lg flex items-center justify-center z-20"
+				aria-label="显示目录"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="3" y1="6" x2="21" y2="6"></line>
+					<line x1="3" y1="12" x2="21" y2="12"></line>
+					<line x1="3" y1="18" x2="21" y2="18"></line>
+				</svg>
+			</button>
+			
+			<!-- 移动端目录抽屉 -->
+			<div 
+				id="mobile-toc" 
+				class="md:hidden fixed inset-0 bg-white dark:bg-gray-900 z-30 transform translate-x-full transition-transform duration-300 ease-in-out"
+			>
+				<div class="h-full overflow-y-auto p-6">
+					<div class="flex justify-between items-center mb-6">
+						<h2 class="text-xl font-medium">目录</h2>
+						<button id="close-toc" class="p-2" aria-label="关闭目录">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="18" y1="6" x2="6" y2="18"></line>
+								<line x1="6" y1="6" x2="18" y2="18"></line>
+							</svg>
+						</button>
+					</div>
+					<nav class="toc-mobile text-base" id="mobile-table-of-contents"></nav>
+				</div>
+			</div>
+				</div>
+			</article>
+		</main>
+</MainLayout>
+
+<script>
+	// 生成目录
+	document.addEventListener('DOMContentLoaded', () => {
+		const article = document.querySelector('.prose');
+		const headings = article?.querySelectorAll('h2, h3, h4');
+		const toc = document.getElementById('table-of-contents');
+		const tocMobile = document.getElementById('mobile-table-of-contents');
+		
+		if (headings && headings.length > 0 && toc && tocMobile) {
+			const tocItems: string[] = [];
+			const headingElements: Element[] = [];
+			
+			headings.forEach((heading, index) => {
+				// 为每个标题添加ID
+				const id = `heading-${index}`;
+				heading.id = id;
+				headingElements.push(heading);
+				
+				const level = parseInt(heading.tagName.substring(1)) - 2; // h2 -> 0, h3 -> 1, h4 -> 2
+				const text = heading.textContent || '';
+				
+				tocItems.push(`
+					<a 
+						href="#${id}" 
+						class="toc-item block py-1 border-l-2 pl-2 ${level === 0 ? 'font-medium' : ''} ${level === 1 ? 'ml-3' : ''} ${level === 2 ? 'ml-6' : ''} border-gray-200 dark:border-gray-700 hover:border-accent hover:text-accent transition-colors"
+						data-heading-id="${id}"
+					>
+						${text}
+					</a>
+				`);
+			});
+			
+			toc.innerHTML = tocItems.join('');
+			tocMobile.innerHTML = tocItems.join('');
+			
+			// 添加滚动监听，高亮当前章节
+			window.addEventListener('scroll', () => {
+				// 获取视口高度，用于计算中心位置
+				const viewportHeight = window.innerHeight;
+				const viewportCenter = viewportHeight / 2;
+				
+				// 获取所有标题元素的位置
+				const headingPositions = headingElements.map(heading => {
+					const rect = heading.getBoundingClientRect();
+					// 计算标题到视口中心的距离
+					const distanceToCenter = Math.abs(rect.top - viewportCenter);
+					return { 
+						id: heading.id, 
+						top: rect.top, 
+						element: heading,
+						distanceToCenter
+					};
+				});
+				
+				// 按照到视口中心距离排序
+				headingPositions.sort((a, b) => a.distanceToCenter - b.distanceToCenter);
+				
+				// 选择最接近视口中心的标题
+				let currentHeadingId = '';
+				if (headingPositions.length > 0) {
+					// 如果最接近中心的标题已经过了视口顶部很多，或者还没到视口底部
+					const closest = headingPositions[0];
+					if (closest.top < viewportHeight && closest.top > -viewportHeight/2) {
+						currentHeadingId = closest.id;
+					} else {
+						// 如果没有合适的标题，找一个在视口上方最近的
+						const aboveHeadings = headingPositions.filter(h => h.top <= 0);
+						if (aboveHeadings.length > 0) {
+							// 按照到顶部的距离排序，选择最接近顶部的
+							aboveHeadings.sort((a, b) => b.top - a.top);
+							currentHeadingId = aboveHeadings[0].id;
+						} else if (headingPositions.length > 0) {
+							// 如果所有标题都在视口下方，选择第一个
+							currentHeadingId = headingPositions[0].id;
+						}
+					}
+				}
+				
+				// 更新目录高亮
+				const allTocItems = document.querySelectorAll('.toc-item');
+				allTocItems.forEach(item => {
+					const headingId = item.getAttribute('data-heading-id');
+					if (headingId === currentHeadingId) {
+						item.classList.add('active-section', 'border-accent', 'text-accent');
+						item.classList.remove('border-gray-200', 'dark:border-gray-700');
+					} else {
+						item.classList.remove('active-section', 'border-accent', 'text-accent');
+						item.classList.add('border-gray-200', 'dark:border-gray-700');
+					}
+				});
+			});
+			
+			// 初始触发一次滚动事件以设置初始状态
+			window.dispatchEvent(new Event('scroll'));
+		}
+
+		// 移动端目录切换
+		const tocToggle = document.getElementById('toc-toggle');
+		const mobileToc = document.getElementById('mobile-toc');
+		const closeToc = document.getElementById('close-toc');
+		
+		tocToggle?.addEventListener('click', () => {
+			mobileToc?.classList.toggle('translate-x-full');
+		});
+		
+		closeToc?.addEventListener('click', () => {
+			mobileToc?.classList.add('translate-x-full');
+		});
+		
+		// 点击移动端目录项后关闭目录
+		const mobileTocItems = mobileToc?.querySelectorAll('.toc-item');
+		mobileTocItems?.forEach(item => {
+			item.addEventListener('click', () => {
+				mobileToc?.classList.add('translate-x-full');
+			});
+		});
+	});
+</script>
+
+<script is:inline>
+	// 阅读进度条 - 使用is:inline避免TypeScript错误
+	document.addEventListener('DOMContentLoaded', function() {
+		const progressBar = document.getElementById('progress-bar');
+		const article = document.querySelector('article');
+		
+		if (progressBar && article) {
+			window.addEventListener('scroll', function() {
+				// 获取文章元素的位置和尺寸信息
+				const articleRect = article.getBoundingClientRect();
+				const articleTop = articleRect.top + window.scrollY;
+				const articleHeight = articleRect.height;
+				
+				// 计算当前滚动位置相对于文章的百分比
+				const scrollPosition = window.scrollY;
+				const windowHeight = window.innerHeight;
+				
+				// 滚动开始位置（文章顶部进入视口）
+				const scrollStart = articleTop - windowHeight;
+				// 滚动结束位置（文章底部离开视口）
+				const scrollEnd = articleTop + articleHeight;
+				
+				// 计算滚动百分比
+				const scrollRange = scrollEnd - scrollStart;
+				const scrollPercentage = ((scrollPosition - scrollStart) / scrollRange) * 100;
+				
+				// 限制百分比在0-100之间
+				const boundedPercentage = Math.max(0, Math.min(100, scrollPercentage));
+				
+				// 设置进度条宽度
+				progressBar.style.width = `${boundedPercentage}%`;
+			});
+			
+			// 初始触发一次滚动事件以设置初始状态
+			window.dispatchEvent(new Event('scroll'));
+		}
+	});
+</script>
+
+<style>
+	/* 文章样式 */
+	.hero {
+		position: relative;
+	}
+	
+	/* 目录样式 */
+	.toc-item {
+		line-height: 1.4;
+		margin-bottom: 0.5rem;
+		opacity: 0.8;
+		transition: opacity 0.2s, border-color 0.3s, color 0.3s;
+	}
+	
+	.toc-item:hover {
+		opacity: 1;
+	}
+	
+	.toc-item.active-section {
+		opacity: 1;
+		font-weight: 500;
+	}
+	
+	/* 阅读进度条 */
+	.reading-progress {
+		height: 3px;
+		background: transparent;
+	}
+	
+	#progress-bar {
+		transition: width 0.1s;
+	}
+	
+	/* 移动端目录抽屉 */
+	#mobile-toc {
+		box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+	}
+</style>

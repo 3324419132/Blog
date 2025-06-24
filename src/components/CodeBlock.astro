@@ -1,0 +1,248 @@
+---
+// 这个组件将用于增强代码块功能，添加复制按钮和语法高亮
+---
+
+<script is:inline>
+  // 在页面加载后处理所有代码块
+  document.addEventListener('DOMContentLoaded', function() {
+    // 获取所有代码块
+    const codeBlocks = document.querySelectorAll('pre code');
+    
+    codeBlocks.forEach(function(codeBlock, index) {
+      // 获取父元素 pre
+      const preBlock = codeBlock.parentElement;
+      if (!preBlock) return;
+      
+      // 为每个代码块添加唯一ID
+      const codeId = `code-block-${index}`;
+      codeBlock.id = codeId;
+      
+      // 创建代码块容器
+      const codeContainer = document.createElement('div');
+      codeContainer.className = 'code-block-container relative';
+      
+      // 提取语言信息
+      let language = '';
+      codeBlock.classList.forEach(function(className) {
+        if (className.startsWith('language-')) {
+          language = className.replace('language-', '');
+        }
+      });
+      
+      // 创建复制按钮容器
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'code-block-header flex items-center justify-between p-2 bg-[#24292e] border-b border-gray-700';
+      
+      // 创建语言标签
+      const languageTag = document.createElement('span');
+      languageTag.className = 'text-xs font-mono text-gray-300';
+      languageTag.textContent = language || 'text';
+      
+      // 创建复制按钮
+      const copyButton = document.createElement('button');
+      copyButton.className = 'copy-button flex items-center gap-1 text-xs py-1 px-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors';
+      copyButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span>复制</span>
+      `;
+      
+      // 添加复制功能
+      copyButton.addEventListener('click', function() {
+        try {
+          // 获取原始代码文本，而不是处理后的HTML
+          const originalText = codeBlock.textContent || '';
+          
+          // 使用Clipboard API复制文本
+          navigator.clipboard.writeText(originalText).then(function() {
+            // 显示复制成功状态
+            copyButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>已复制</span>
+            `;
+            copyButton.classList.add('bg-green-700');
+            copyButton.classList.remove('bg-gray-700');
+            
+            // 2秒后恢复原始状态
+            setTimeout(function() {
+              copyButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>复制</span>
+              `;
+              copyButton.classList.remove('bg-green-700');
+              copyButton.classList.add('bg-gray-700');
+            }, 2000);
+          }).catch(function(err) {
+            console.error('复制失败: ', err);
+            showCopyError();
+          });
+        } catch (err) {
+          console.error('复制失败: ', err);
+          showCopyError();
+        }
+        
+        function showCopyError() {
+          // 显示复制失败状态
+          copyButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>复制失败</span>
+          `;
+          copyButton.classList.add('bg-red-700');
+          copyButton.classList.remove('bg-gray-700');
+          
+          // 2秒后恢复原始状态
+          setTimeout(function() {
+            copyButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>复制</span>
+            `;
+            copyButton.classList.remove('bg-red-700');
+            copyButton.classList.add('bg-gray-700');
+          }, 2000);
+        }
+      });
+      
+      // 将语言标签和复制按钮添加到按钮容器
+      buttonContainer.appendChild(languageTag);
+      buttonContainer.appendChild(copyButton);
+      
+      // 将按钮容器添加到代码块容器中
+      codeContainer.appendChild(buttonContainer);
+      
+      // 保存原始代码内容
+      const originalCode = codeBlock.cloneNode(true);
+      
+      // 创建代码内容容器
+      const codeContentContainer = document.createElement('div');
+      codeContentContainer.className = 'code-content-container overflow-auto p-4';
+      
+      // 将原始代码添加到代码内容容器
+      codeContentContainer.appendChild(originalCode);
+      
+      // 将代码内容容器添加到代码块容器中
+      codeContainer.appendChild(codeContentContainer);
+      
+      // 清空pre标签内容并添加代码块容器
+      preBlock.innerHTML = '';
+      preBlock.appendChild(codeContainer);
+      
+      // 修改pre标签的样式
+      preBlock.classList.add('code-block-wrapper', 'rounded-lg', 'overflow-hidden');
+      preBlock.classList.remove('p-4'); // 移除可能的内边距，我们会在内部容器中控制
+    });
+  });
+</script>
+
+<style is:global>
+  /* 代码块样式 */
+  pre.code-block-wrapper {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background-color: #24292e;
+    color: #e1e4e8;
+  }
+  
+  .code-block-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .code-content-container {
+    position: relative;
+    overflow-x: auto;
+  }
+  
+  pre code {
+    display: block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    background-color: #24292e;
+    color: #e1e4e8;
+  }
+  
+  /* 暗色模式适配 */
+  .dark pre {
+    box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  /* 代码高亮样式 - GitHub风格 */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: #8b949e;
+  }
+  
+  .token.punctuation {
+    color: #c9d1d9;
+  }
+  
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol {
+    color: #79c0ff;
+  }
+  
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin {
+    color: #a5d6ff;
+  }
+  
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    color: #d2a8ff;
+  }
+  
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: #ff7b72;
+  }
+  
+  .token.function,
+  .token.class-name {
+    color: #f2cc60;
+  }
+  
+  .token.regex,
+  .token.important,
+  .token.variable {
+    color: #c9d1d9;
+  }
+</style> 

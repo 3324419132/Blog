@@ -1,0 +1,75 @@
+---
+// 这个组件用于实现页面之间的平滑过渡效果
+---
+
+<div id="page-transition-overlay" class="fixed inset-0 z-[9999] pointer-events-none opacity-0">
+  <div class="transition-layer absolute inset-0 bg-white dark:bg-gray-900 transform -translate-y-full"></div>
+</div>
+
+<script>
+  // 页面过渡动画控制
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('page-transition-overlay');
+    const transitionLayer = overlay?.querySelector('.transition-layer');
+    
+    // 确保初始状态是隐藏的
+    if (overlay) {
+      overlay.classList.add('opacity-0');
+    }
+    
+    // 页面链接点击时执行出场动画
+    document.addEventListener('click', (e) => {
+      // 检查点击的是否为内部链接
+      const target = e.target as HTMLElement;
+      const anchor = target.tagName === 'A' ? target : target.closest('a');
+      
+      if (!anchor) return;
+      
+      const href = anchor.getAttribute('href');
+      const isInternalLink = href && href.startsWith('/') && !href.startsWith('//');
+      const isHashLink = href && href.startsWith('#');
+      const hasTarget = anchor.hasAttribute('target');
+      const hasDownload = anchor.hasAttribute('download');
+      
+      // 如果是内部链接且不是锚点链接，执行过渡动画
+      if (isInternalLink && !isHashLink && !hasTarget && !hasDownload) {
+        e.preventDefault();
+        
+        if (overlay && transitionLayer) {
+          // 显示蒙版
+          overlay.classList.remove('opacity-0');
+          
+          // 执行出场动画
+          transitionLayer.classList.remove('animate-slideUp');
+          transitionLayer.classList.add('animate-slideDown');
+          
+          // 动画结束后跳转到新页面
+          setTimeout(() => {
+            window.location.href = href;
+          }, 350); // 动画持续时间
+        } else {
+          // 如果动画元素不存在，直接跳转
+          window.location.href = href;
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  #page-transition-overlay {
+    transition: opacity 0.3s ease;
+  }
+  
+  .transition-layer {
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .animate-slideUp {
+    transform: translateY(-100%);
+  }
+  
+  .animate-slideDown {
+    transform: translateY(0);
+  }
+</style> 

@@ -1,0 +1,71 @@
+---
+// 评论组件 - 使用Giscus实现基于GitHub Discussions的评论功能
+---
+
+<section class="comments-container my-10">
+  <h2 class="text-2xl font-serif font-bold mb-6">留言讨论</h2>
+  
+  <div class="giscus-container">
+    <!-- Giscus评论容器 -->
+  </div>
+</section>
+
+<script is:inline>
+  // 动态加载Giscus脚本
+  document.addEventListener('DOMContentLoaded', function() {
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', '3324419132/personal-blog'); // 使用您的GitHub账号
+    script.setAttribute('data-repo-id', ''); // 需要在GitHub上创建仓库后获取
+    script.setAttribute('data-category', 'Announcements'); // 需要在GitHub上创建Discussion分类
+    script.setAttribute('data-category-id', ''); // 需要在GitHub上创建Discussion分类后获取
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', 'preferred_color_scheme');
+    script.setAttribute('data-lang', 'zh-CN');
+    script.setAttribute('data-loading', 'lazy');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.async = true;
+    
+    // 检测暗色模式并设置相应主题
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    script.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    
+    // 监听主题变化
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.attributeName === 'class') {
+          const isDark = document.documentElement.classList.contains('dark');
+          const giscusFrame = document.querySelector('iframe.giscus-frame');
+          if (giscusFrame) {
+            try {
+              giscusFrame.contentWindow.postMessage(
+                { giscus: { setConfig: { theme: isDark ? 'dark' : 'light' } } },
+                'https://giscus.app'
+              );
+            } catch (e) {
+              console.error('无法更新Giscus主题:', e);
+            }
+          }
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    
+    // 添加脚本到页面
+    const container = document.querySelector('.giscus-container');
+    if (container) {
+      container.appendChild(script);
+    }
+  });
+</script>
+
+<style>
+  .giscus-container {
+    margin-top: 2rem;
+  }
+</style> 

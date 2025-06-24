@@ -1,0 +1,158 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { Image } from 'astro:assets';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// 获取所有标签
+const allTags = [...new Set(posts.flatMap(post => post.data.tags || []))];
+---
+
+<MainLayout title={`博客 | ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<main class="max-w-6xl mx-auto px-4 py-8">
+		<div class="flex flex-col md:flex-row justify-between items-center mb-8">
+			<h1 class="text-4xl font-serif font-bold text-center md:text-left">博客文章</h1>
+			
+			<!-- RSS订阅按钮 -->
+			<a 
+				href="/rss.xml" 
+				target="_blank" 
+				class="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-full hover:bg-accent/80 transition-colors mt-4 md:mt-0"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M4 11a9 9 0 0 1 9 9"></path>
+					<path d="M4 4a16 16 0 0 1 16 16"></path>
+					<circle cx="5" cy="19" r="1"></circle>
+				</svg>
+				订阅 RSS
+			</a>
+		</div>
+		
+		<!-- 标签筛选器 -->
+		<div class="mb-8">
+			<h2 class="text-xl font-medium mb-4">按标签筛选</h2>
+			<div class="flex flex-wrap gap-2" id="tag-filters">
+				<button 
+					class="tag-filter active px-3 py-1 rounded-full bg-accent text-white hover:bg-accent/80 transition-colors"
+					data-tag="all"
+				>
+					全部
+				</button>
+				{allTags.map(tag => (
+					<button 
+						class="tag-filter px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-accent/20 transition-colors"
+						data-tag={tag}
+					>
+						{tag}
+					</button>
+				))}
+			</div>
+		</div>
+		
+		<!-- 瀑布流布局 -->
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="posts-container">
+			{posts.map((post) => (
+				<article class="post-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full flex flex-col" data-tags={post.data.tags?.join(',')}>
+					<a href={`/blog/${post.slug}`} class="block h-full flex flex-col">
+						{post.data.heroImage && (
+							<div class="aspect-video overflow-hidden">
+								<Image 
+									src={post.data.heroImage} 
+									alt="" 
+									width={600} 
+									height={340} 
+									class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+								/>
+							</div>
+						)}
+						<div class="p-5 flex flex-col flex-grow">
+							<h2 class="text-xl font-bold mb-2 line-clamp-2">{post.data.title}</h2>
+							<p class="text-gray-500 dark:text-gray-400 text-sm mb-3">
+								<FormattedDate date={post.data.pubDate} />
+							</p>
+							<p class="text-gray-600 dark:text-gray-300 line-clamp-3 mb-4 flex-grow">
+								{post.data.description}
+							</p>
+							
+							{post.data.tags && (
+								<div class="flex flex-wrap gap-2 mt-auto">
+									{post.data.tags.map(tag => (
+										<span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+											{tag}
+										</span>
+									))}
+								</div>
+							)}
+						</div>
+					</a>
+				</article>
+			))}
+		</div>
+	</main>
+</MainLayout>
+
+<script>
+	// 标签筛选功能
+	document.addEventListener('DOMContentLoaded', () => {
+		const tagFilters = document.querySelectorAll('.tag-filter');
+		const postCards = document.querySelectorAll<HTMLElement>('.post-card');
+		
+		tagFilters.forEach(filter => {
+			filter.addEventListener('click', () => {
+				// 更新按钮样式
+				tagFilters.forEach(btn => {
+					btn.classList.remove('active', 'bg-accent', 'text-white');
+					btn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+				});
+				
+				filter.classList.add('active', 'bg-accent', 'text-white');
+				filter.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+				
+				const selectedTag = filter.getAttribute('data-tag');
+				
+				// 筛选文章
+				postCards.forEach(card => {
+					if (selectedTag === 'all') {
+						card.style.display = 'block';
+						setTimeout(() => {
+							card.style.opacity = '1';
+							card.style.transform = 'scale(1)';
+						}, 10);
+					} else {
+						const cardTags = card.getAttribute('data-tags')?.split(',') || [];
+						if (cardTags.includes(selectedTag || '')) {
+							card.style.display = 'block';
+							setTimeout(() => {
+								card.style.opacity = '1';
+								card.style.transform = 'scale(1)';
+							}, 10);
+						} else {
+							card.style.opacity = '0';
+							card.style.transform = 'scale(0.9)';
+							setTimeout(() => {
+								card.style.display = 'none';
+							}, 300);
+						}
+					}
+				});
+			});
+		});
+	});
+</script>
+
+<style>
+	/* 文章卡片样式 */
+	.post-card {
+		transition: opacity 0.3s ease, transform 0.3s ease;
+	}
+	
+	/* 标签筛选器样式 */
+	.tag-filter {
+		transition: all 0.3s ease;
+	}
+</style>

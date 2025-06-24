@@ -1,0 +1,218 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+
+// 从内容集合中获取项目数据
+const projectEntries = await getCollection('projects');
+const projects = projectEntries.map(project => ({
+  id: project.slug,
+  title: project.data.title,
+  description: project.data.description,
+  image: project.data.heroImage || "https://images.unsplash.com/photo-1596742578443-7682ef5251cd?q=80&w=800",
+  tags: project.data.tags || [],
+  link: project.data.link || "#",
+  github: project.data.github || "https://github.com",
+}));
+
+// 如果没有项目数据，使用默认示例项目
+if (projects.length === 0) {
+  projects.push(
+    {
+      id: "project-1",
+      title: "智能客服系统",
+      description: "基于AI的智能客服系统，能够自动识别用户意图并提供相应的服务，大幅提高了客户支持效率。",
+      image: "https://images.unsplash.com/photo-1596742578443-7682ef5251cd?q=80&w=800",
+      tags: ["React", "Node.js", "MongoDB", "自然语言处理"],
+      link: "#",
+      github: "https://github.com",
+    },
+    {
+      id: "project-2",
+      title: "数据可视化平台",
+      description: "企业级数据分析和可视化平台，提供直观的界面让用户能快速创建各类图表和仪表盘，实时监控业务指标。",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800",
+      tags: ["Vue.js", "D3.js", "Express", "PostgreSQL"],
+      link: "#",
+      github: "https://github.com",
+    },
+    {
+      id: "project-3",
+      title: "电子商务网站",
+      description: "完整的在线购物平台，包含商品展示、购物车、支付集成和订单管理等功能，采用响应式设计适配各类设备。",
+      image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=800",
+      tags: ["Next.js", "Tailwind CSS", "Stripe", "Prisma"],
+      link: "#",
+      github: "https://github.com",
+    },
+    {
+      id: "project-4",
+      title: "个人博客系统",
+      description: "基于Astro构建的个人博客系统，具有卓越的性能和SEO优化，支持Markdown内容管理和暗色模式。",
+      image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=800",
+      tags: ["Astro", "Tailwind CSS", "Markdown", "Jamstack"],
+      link: "#",
+      github: "https://github.com",
+    }
+  );
+}
+---
+
+<MainLayout title={`项目 | ${SITE_TITLE}`} description="我的项目作品集，展示我的技能和能力">
+	<main class="container mx-auto px-4 py-8">
+		<header class="max-w-4xl mx-auto mb-12 text-center">
+			<h1 class="text-4xl md:text-5xl font-serif font-bold mb-4 text-gray-900 dark:text-gray-100">
+				项目展示
+			</h1>
+			<p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+				以下是我近期参与的一些项目。每一个项目都代表了我在特定技术领域的探索和成长。
+			</p>
+		</header>
+		
+		<div class="max-w-6xl mx-auto flex flex-col md:flex-row mt-12">
+			<!-- 左侧导航栏 -->
+			<aside class="md:w-1/4 mb-8 md:mb-0">
+				<div class="md:sticky md:top-24 space-y-2">
+					<h2 class="font-serif text-xl mb-4 text-gray-900 dark:text-gray-100">项目列表</h2>
+					<nav id="project-nav" class="space-y-2">
+						{projects.map((project) => (
+							<a 
+								href={`#${project.id}`}
+								class="block py-2 px-4 border-l-2 border-transparent hover:border-accent hover:text-accent transition-colors focus:outline-none text-gray-700 dark:text-gray-300 text-lg"
+								data-project-link={project.id}
+							>
+								{project.title}
+							</a>
+						))}
+					</nav>
+				</div>
+			</aside>
+			
+			<!-- 右侧项目详情 -->
+			<div class="md:w-3/4 md:pl-12">
+				<div class="space-y-24" id="projects-container">
+					{projects.map((project) => (
+						<section 
+							id={project.id} 
+							class="project-card scroll-mt-24"
+							data-project={project.id}
+						>
+							<div class="bg-white dark:bg-gray-800 rounded-xl shadow-card overflow-hidden">
+								<div class="aspect-w-16 aspect-h-9 overflow-hidden">
+									<img 
+										src={project.image} 
+										alt={project.title} 
+										class="w-full h-full object-cover"
+									/>
+								</div>
+								<div class="p-6 md:p-8">
+									<h2 class="text-2xl md:text-3xl font-serif font-bold mb-3 text-gray-900 dark:text-gray-100">
+										{project.title}
+									</h2>
+									<p class="text-gray-600 dark:text-gray-400 mb-6">
+										{project.description}
+									</p>
+									<div class="mb-6 flex flex-wrap gap-2">
+										{project.tags.map((tag) => (
+											<span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-800 dark:text-gray-200">
+												{tag}
+											</span>
+										))}
+									</div>
+									<div class="flex space-x-4">
+										<a 
+											href={project.github} 
+											target="_blank" 
+											rel="noopener noreferrer"
+											class="inline-flex items-center px-4 py-2 rounded-md bg-accent hover:bg-accent-dark text-white transition-colors"
+										>
+											<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+												<path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+											</svg>
+											查看源码
+										</a>
+										<a 
+											href={project.link} 
+											target="_blank" 
+											rel="noopener noreferrer"
+											class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+										>
+											<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+											</svg>
+											访问项目
+										</a>
+									</div>
+								</div>
+							</div>
+						</section>
+					))}
+				</div>
+			</div>
+		</div>
+	</main>
+</MainLayout>
+
+<script>
+	// 处理滚动时高亮当前项目
+	function highlightCurrentProject() {
+		const projectLinks = document.querySelectorAll("[data-project-link]");
+		const projectSections = document.querySelectorAll(".project-card");
+		
+		// 观察项目卡片的可见性
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const projectId = (entry.target as HTMLElement).dataset.project;
+					
+					// 移除所有链接的活动状态
+					projectLinks.forEach(link => {
+						link.classList.remove("text-accent", "border-accent");
+						link.classList.add("border-transparent");
+					});
+					
+					// 设置当前链接的活动状态
+					const activeLink = document.querySelector(`[data-project-link="${projectId}"]`);
+					if (activeLink) {
+						activeLink.classList.add("text-accent", "border-accent");
+						activeLink.classList.remove("border-transparent");
+					}
+				}
+			});
+		}, { threshold: 0.3 });
+		
+		// 观察所有项目卡片
+		projectSections.forEach(section => {
+			observer.observe(section);
+		});
+		
+		// 处理导航点击
+		projectLinks.forEach(link => {
+			link.addEventListener("click", (e) => {
+				e.preventDefault();
+				const targetId = link.getAttribute("href");
+				const targetElement = targetId ? document.querySelector(targetId) : null;
+				
+				if (targetElement) {
+					// 平滑滚动到目标元素
+					targetElement.scrollIntoView({ behavior: "smooth" });
+					
+					// 更新URL而不刷新页面
+					history.pushState(null, "", targetId);
+				}
+			});
+		});
+	}
+	
+	// 页面加载后执行
+	document.addEventListener("DOMContentLoaded", () => {
+		highlightCurrentProject();
+	});
+</script>
+
+<style>
+	/* 项目卡片阴影 */
+	.shadow-card {
+		box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+	}
+</style> 
